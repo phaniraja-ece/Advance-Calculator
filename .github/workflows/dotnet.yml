@@ -28,3 +28,14 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Publish
       run: dotnet publish -r win-x64 -c Release
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dotnet-build-raw
+        path: "**/bin/Debug/net10.0/" # Or bin/Release/ depending on your build step
+
+    - name: Upload Published Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-x64-publish
+        path: "**/bin/Release/net10.0/win-x64/publish/"
