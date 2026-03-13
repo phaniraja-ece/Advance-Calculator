@@ -1,12 +1,2 @@
 # Advance-Calculator
-It is a C# based Calculator which uses BigInteger so it is not limited to only 10³⁰⁸.
-
-I would recommend you to manually compile.
-
-To compile manually:
-
-• Have .NET 10 SDK Installed <br>
-• Clone the project using git clone or download the compile.zip in releases <br>
-• Open the Terminal in the Folder <br>
-• Type '''powershell dotnet publish -r win-x64 -c Release in the terminal''' <br>
-• And run the exe in /bin/Release/net10.0/win-x64/publish <br>
+[![.NET-C#-Windows](https://github.com/phaniraja-ece/Advance-Calculator/actions/workflows/dotnet.yml/badge.svg)](https://github.com/phaniraja-ece/Advance-Calculator/actions/workflows/dotnet.yml)
