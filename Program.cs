@@ -1,6 +1,10 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Numerics; // For BigInteger support in factorials > 20
+using Microsoft.Win32;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.Linq;
 
 
 class Calculator
@@ -50,6 +54,8 @@ class Calculator
                     case "SQUARE": Square(); break;
                     case "CUBE": Cube(); break;
                     case "FACTORIAL": Factorial(); break;
+                    case "TETRATION": Tetration(); break; //Advanced Operation
+                    case "PENTATION": Pentation(); break; //Advanced Operation
                     case "TEST": RunTestSuite(); break; // Hidden option for testing
                     case "PI": ShowSecretPi(); break; // Hidden Easter Egg for Pi
                     case "PHI": ShowGoldenRatio(); break;// Hidden Easter Egg for Golden Ratio
@@ -90,7 +96,7 @@ class Calculator
     {
         Console.WriteLine("=== ADVANCED CALCULATOR ===");
         Console.WriteLine("\nAvailable Operations:");
-        Console.WriteLine("  ADD, SUB, MULTIPLY, DIVIDE, ROOT, SQUAREROOT, CUBEROOT, EXPONENT, MULTI-OPERATION, SQUARE, CUBE, FACTORIAL, SET-THEME");
+        Console.WriteLine("  ADD, SUB, MULTIPLY, DIVIDE, ROOT, SQUAREROOT, CUBEROOT, EXPONENT, MULTI-OPERATION, SQUARE, CUBE, FACTORIAL, TETRATION, PENTATION, SET-THEME");
         Console.WriteLine("\n Type HELP for examples or EXIT to quit");
         Console.WriteLine(new string('=', 50));
     }
@@ -100,9 +106,20 @@ class Calculator
         Console.Clear();
         Console.WriteLine("=== HELP & EXAMPLES ===");
         Console.WriteLine("  ADD              - Addition");
+        Console.WriteLine("  SUB              - Subtraction");
+        Console.WriteLine("  MULTIPLY         - Multiplication");
+        Console.WriteLine("  DIVIDE           - Division");
         Console.WriteLine("  ROOT             - Nth Root");
+        Console.WriteLine("  SQUAREROOT       - Square Root (√16)");
+        Console.WriteLine("  CUBEROOT         - Cube Root (∛8)");
+        Console.WriteLine("  EXPONENT         - Power (2^3)"); 
         Console.WriteLine("  MULTI-OPERATION  - Basic math (2+3, 5*4)");
-        Console.WriteLine("  FACTORIAL        - n!");
+        Console.WriteLine("  SQUARE            - Squares any number (2²)");
+        Console.WriteLine("  CUBE             - Cubes any number (2³)");
+        Console.WriteLine("  FACTORIAL        - Finds the factorial of a number (n!)");
+        Console.WriteLine("  TETRATION        - Tetration (n^n^n...) or iterated exponentiation (²3)");
+        Console.WriteLine("  PENTATION        - Pentation (n^n^n^n...) or iterated tetration (₂2)");
+        Console.WriteLine("  SET-THEME        - Change the color scheme of the calculator, apply a fun theme! or set a particular vibe or theme for your calculations.");
         Console.WriteLine("\nPress Enter to return...");
         Console.ReadLine();
     }
@@ -1082,6 +1099,380 @@ static void BigDecUnaryOp(string name, Func<BigInteger, BigInteger> op)
     Console.ReadLine();
 }
 // Place this near your other method definitions (e.g., after Factorial or Divide)
+
+static void Tetration()
+{
+    Console.WriteLine("\n--- TETRATION MODE (500 Decimal Scaling) ---");
+    Console.Write("Enter Base (Decimal): ");
+    string sBase = (Console.ReadLine() ?? "0").Trim();
+    int height = GetInt("Height (Whole Number)");
+
+    if (height < 0) { Console.WriteLine("Invalid Height."); return; }
+    if (height == 0) { Console.WriteLine("Result: 1"); return; }
+
+    try
+    {
+        // We use your Multi-Op / Exponent logic: treat base as decimal
+        string result = sBase;
+        
+        for (int i = 1; i < height; i++)
+        {
+            // Calculation: result = base ^ result
+            // Note: For Tetration, the exponent usually must be an integer for BigInteger.Pow
+            // To handle decimal bases, we use the scaling logic from your Square/Cube methods.
+            DrawProgressBar(i, height - 1, "Calculating Tetration");
+            result = ExecuteHighPrecisionPower(sBase, result);
+            
+        }
+
+        Console.WriteLine("--------------------------------------------------");
+        Console.WriteLine($"Result: {(result.Length > 100 ? result.Substring(0, 50) + "..." : result)}");
+        Console.WriteLine("--------------------------------------------------");
+    }
+    catch (Exception ex) { Console.WriteLine($"Engine Overflow: {ex.Message}"); }
+    Console.ReadLine();
+}
+
+static string ExecuteHighPrecisionPower(string baseStr, string expStr)
+{
+
+    
+
+    // Uses your existing BigDecUnaryOp style scaling
+    int dot = baseStr.IndexOf('.');
+    int p = dot < 0 ? 0 : baseStr.Length - dot - 1;
+    
+    BigInteger b = BigInteger.Parse(baseStr.Replace(".", ""));
+    // Tetration requires integer heights for standard BigInteger.Pow
+    int e = (int)double.Parse(expStr); 
+    
+    // ... [Existing scaling logic] ...
+
+    // ADD THIS SAFETY GATE
+    // Estimate if the resulting BigInteger will be too large (e.g., > 100 million digits)
+    // log10(base^exp) = exp * log10(base)
+    //double logBase = BigInteger.Log10(b);
+    //if (e * logBase > 100_000_000) 
+    //{
+    //    throw new OverflowException("RESULT_TOO_LARGE: Calculation would exceed available RAM.");
+    //}
+
+    // Calculate RAM-based safety limit
+    // We cap it at approximately 10 million digits per GB of RAM.
+    long totalRam = RamHardwareProvider.GetTotalRamGb();
+    long maxSafeDigits = totalRam * 10_000_000;
+
+    double logBase = BigInteger.Log10(b);
+    if (e * logBase > maxSafeDigits) 
+    {
+        throw new OverflowException($"SYSTEM_LIMIT: Calculation exceeds safe capacity for {totalRam}GB RAM.");
+    }
+
+    BigInteger res = BigInteger.Pow(b, e);
+    int finalP = p * e;
+
+    string r = res.ToString();
+    if (r.Length <= finalP) r = r.PadLeft(finalP + 1, '0');
+    string final = r.Insert(r.Length - finalP, ".");
+    
+    // Apply your 500-place cap
+    int dotIdx = final.IndexOf('.');
+    if (dotIdx != -1 && (final.Length - dotIdx - 1) > 500)
+        final = final.Substring(0, dotIdx + 501);
+
+    return final.TrimEnd('0').TrimEnd('.');
+}
+
+static void Pentation()
+{
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine("\n--- PENTATION MODE (Hyper-5 Operator) ---");
+    
+    Console.Write("Enter Base (a): ");
+    string sBase = (Console.ReadLine() ?? "2").Trim();
+    int p = GetInt("Pentation Level (b)");
+
+    if (p < 0) { Console.WriteLine("Invalid Level."); return; }
+    if (p == 0) { Console.WriteLine("Result: 1"); return; }
+    if (p == 1) { Console.WriteLine($"Result: {sBase}"); return; }
+
+    try
+    {
+        // Safety Gate: Pentation at level 3 or higher with base >= 2 
+        // will exceed the number of atoms in the universe.
+        //if (p >= 3 && double.Parse(sBase) >= 2)
+        //{
+           // Console.ForegroundColor = ConsoleColor.Red;
+            //Console.WriteLine("!!! [ CRITICAL SYSTEM ALERT ] !!!");
+           // Console.WriteLine("Pentation level triggers logic collapse. Result exceeds RAM capacity.");
+           // Console.ResetColor();
+            //return;
+        //}
+        // Calculate RAM-based safety limit
+    // We cap it at approximately 10 million digits per GB of RAM.
+    
+
+        string result = sBase;
+        Console.WriteLine("Iterating through Hyper-Levels...");
+
+        for (int i = 1; i < p; i++)
+        {
+            // Pentation(a, p) = Tetration(a, Pentation(a, p-1))
+            // Since we know p is small (due to the safety gate), 
+            // we can safely iterate using the Tetration logic.
+            DrawProgressBar(i, p - 1, $"Level {i}/{p}");
+            int nextHeight = (int)double.Parse(result);
+            result = sBase; // Reset for the next tetration tower
+
+            for (int j = 1; j < nextHeight; j++)
+            {
+                result = ExecuteHighPrecisionPower(sBase, result);
+                
+            }
+        }
+
+        Console.WriteLine("--------------------------------------------------");
+        Console.WriteLine($"Result: {(result.Length > 100 ? result.Substring(0, 50) + "..." : result)}");
+        Console.WriteLine("--------------------------------------------------");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"\n[ HYPER-OP FAILURE ]: {ex.Message}");
+    }
+    finally
+    {
+        Console.ResetColor();
+    }
+    Console.ReadLine();
+}
+static string GetCPUInfo()
+{
+    // --- WINDOWS LOGIC ---
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    {
+        try
+        {
+            const string keyPath = @"HARDWARE\DESCRIPTION\System\CentralProcessor\0";
+            using var key = Registry.LocalMachine.OpenSubKey(keyPath);
+            return key?.GetValue("ProcessorNameString")?.ToString()?.Trim() ?? "Windows Processor";
+        }
+        catch { return "Generic Windows CPU"; }
+    }
+
+    // --- LINUX LOGIC ---
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+    {
+        try
+        {
+            // Read from /proc/cpuinfo
+            var lines = File.ReadAllLines("/proc/cpuinfo");
+            var modelLine = lines.FirstOrDefault(l => l.StartsWith("model name", StringComparison.OrdinalIgnoreCase));
+            return modelLine?.Split(':')[1].Trim() ?? "Linux Processor";
+        }
+        catch { return "Generic Linux CPU"; }
+    }
+
+    // --- MACOS LOGIC ---
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+    {
+        try
+        {
+            // Execute sysctl command
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "sysctl",
+                Arguments = "-n machdep.cpu.brand_string",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            using var process = Process.Start(startInfo);
+            return process?.StandardOutput.ReadToEnd().Trim() ?? "Apple Silicon / Intel";
+        }
+        catch { return "Generic macOS CPU"; }
+    }
+
+    return "Unknown Architecture";
+}
+
+public class RamInfo
+{
+    public string Manufacturer { get; set; } = "Unknown";
+    public string Speed { get; set; } = "Unknown";
+    public string PartNumber { get; set; } = "Unknown";
+}
+
+public static class RamHardwareProvider
+{
+    /// <summary>
+    /// Gets the total physical RAM in GB using OS-native high-performance calls.
+    /// </summary>
+    public static long GetTotalRamGb()
+    {
+        try
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var status = new NativeMethods.MemoryStatusEx();
+                status.Init(); 
+                if (NativeMethods.GlobalMemoryStatusEx(ref status))
+                {
+                    return (long)(status.ullTotalPhys / (1024 * 1024 * 1024));
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                string memInfo = File.ReadLines("/proc/meminfo").First();
+                string kbOnly = new string(memInfo.Where(char.IsDigit).ToArray());
+                return long.Parse(kbOnly) / (1024 * 1024);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                string result = RunCommand("sysctl", "-n hw.memsize");
+                return long.Parse(result) / (1024 * 1024 * 1024);
+            }
+        }
+        catch { }
+        return 8; // Fail-safe
+    }
+
+    /// <summary>
+    /// Gets detailed hardware info for each RAM stick.
+    /// </summary>
+    public static List<RamInfo> GetRamHardwareDetails()
+    {
+        List<RamInfo> ramModules = new List<RamInfo>();
+        try
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // CSV format is highly robust for AOT string parsing
+                string output = RunCommand("powershell", "-NoProfile -Command \"Get-CimInstance Win32_PhysicalMemory | Select-Object Manufacturer, Speed, PartNumber | ConvertTo-Csv -NoTypeInformation\"");
+                ramModules = ParseWindowsCsv(output);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                // Non-root Linux users cannot access SPD; report 'Unknown' to maintain data integrity
+                if (File.Exists("/proc/meminfo"))
+                {
+                    ramModules.Add(new RamInfo { Manufacturer = "Unknown", Speed = "Unknown", PartNumber = "Physical Memory" });
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                string output = RunCommand("system_profiler", "SPMemoryDataType");
+                ramModules = ParseMacOutput(output);
+            }
+        }
+        catch { }
+        return ramModules;
+    }
+
+    private static string RunCommand(string fileName, string arguments)
+    {
+        try
+        {
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = fileName,
+                Arguments = arguments,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using (Process process = Process.Start(psi) ?? throw new Exception())
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+                return output.Trim();
+            }
+        }
+        catch { return string.Empty; }
+    }
+
+    private static List<RamInfo> ParseWindowsCsv(string output)
+    {
+        var list = new List<RamInfo>();
+        var lines = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Skip(1);
+
+        foreach (var line in lines)
+        {
+            var parts = line.Split(',').Select(p => p.Trim('"')).ToArray();
+            if (parts.Length >= 3)
+            {
+                list.Add(new RamInfo {
+                    Manufacturer = string.IsNullOrWhiteSpace(parts[0]) ? "Unknown" : parts[0],
+                    Speed = string.IsNullOrWhiteSpace(parts[1]) ? "Unknown" : parts[1] + " MHz",
+                    PartNumber = string.IsNullOrWhiteSpace(parts[2]) ? "Unknown" : parts[2]
+                });
+            }
+        }
+        return list;
+    }
+
+    private static List<RamInfo> ParseMacOutput(string output)
+    {
+        var list = new List<RamInfo>();
+        var lines = output.Split('\n');
+        RamInfo? current = null;
+
+        foreach (var line in lines)
+        {
+            string t = line.Trim();
+            if (t.StartsWith("Size:")) 
+            {
+                if (current != null) list.Add(current);
+                current = new RamInfo();
+            }
+            if (current == null) continue;
+
+            if (t.StartsWith("Manufacturer:")) current.Manufacturer = t.Split(':')[1].Trim();
+            else if (t.StartsWith("Speed:")) current.Speed = t.Split(':')[1].Trim();
+            else if (t.StartsWith("Part Number:")) current.PartNumber = t.Split(':')[1].Trim();
+        }
+        if (current != null) list.Add(current);
+        return list;
+    }
+
+    // Windows P/Invoke structure for AOT-safe memory calls
+    internal static class NativeMethods
+    {
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct MemoryStatusEx
+        {
+            internal uint dwLength;
+            internal uint dwMemoryLoad;
+            internal ulong ullTotalPhys;
+            internal ulong ullAvailPhys;
+            internal ulong ullTotalPageFile;
+            internal ulong ullAvailPageFile;
+            internal ulong ullTotalVirtual;
+            internal ulong ullAvailVirtual;
+            internal ulong ullAvailExtendedVirtual;
+
+            public void Init() => this.dwLength = 64; 
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool GlobalMemoryStatusEx(ref MemoryStatusEx lpBuffer);
+    }
+}
+
+static void DrawProgressBar(int current, int total, string label)
+{
+    int barLength = 30;
+    double progress = (double)current / total;
+    int filledLength = (int)(barLength * progress);
+
+    Console.Write($"\r{label} [");
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.Write(new string('█', filledLength));
+    Console.ForegroundColor = ConsoleColor.DarkGray;
+    Console.Write(new string('-', barLength - filledLength));
+    Console.ResetColor();
+    Console.Write($"] {(progress * 100):0}% ");
+}
 static void SetTheme(string themeName)
 {
     switch (themeName.ToUpper())
@@ -1179,7 +1570,7 @@ static void ShowCredits()
     Console.WriteLine("Developer: Gemini 3 Flash (Your Friendly Neighborhood C# Coder)");
     Console.WriteLine($"Build Version: {version}");
     Console.WriteLine("Architecture: 500-Decimal Precision scaling");
-    Console.WriteLine("Hardware: Optimized for Intel i7-13620H @ 2.40GHz");
+    Console.WriteLine($"Hardware: Optimized for Intel i7-13620H @ 2.40GHz. \n Works on any CPU, but expect best performance on mid-range to high-end machines. \n Your mileage may vary on older hardware. \n You can still run it, but be patient with large calculations!\n  You might want to avoid the Tetration and Pentation modes on very old CPUs. \n You've been warned! Your CPU is doing its best to keep up, but some operations may take a while. \n Consider using the simpler modes for faster results on older machines. Your CPU is a hero for even running this engine, so give it some love and patience! Your CPU is {cpuInfo} .\n You can check your CPU and RAM amount details in the 'Show Version' section for more info.");
     Console.WriteLine($"Current System Time: {DateTime.Now}");
     Console.WriteLine("\n'The math is infinite, but the code is perfect.'");
     Console.WriteLine("--------------------------------------------------");
@@ -1207,13 +1598,40 @@ static void ShowRosterSet()
     Console.WriteLine("\nPress Enter to return...");
     Console.ReadLine();
 }
-static void ShowVersion()
+
+static string cpuInfo = GetCPUInfo();
+static long ramInfo = RamHardwareProvider.GetTotalRamGb();
+    static void ShowVersion()
 {
+    // Get RAM sticks details
+    List<RamInfo> modules = RamHardwareProvider.GetRamHardwareDetails();
+
+    // Prepare a list to store info for each stick
+    List<string> ramDescriptions = new List<string>();
+
+    int stickIndex = 1;
+    foreach (var ram in modules)
+    {
+        string make = ram.Manufacturer;
+        string speed = ram.Speed;
+        string model = ram.PartNumber;
+
+        // Add formatted string to the list
+        ramDescriptions.Add($"Stick {stickIndex}: Manufacturer={make}, Speed={speed}, Model={model}");
+        stickIndex++;
+    }
+
+    // Combine all RAM info into one string
+    string allRamInfo = ramDescriptions.Count > 0
+        ? string.Join("; ", ramDescriptions)
+        : "No RAM modules detected";
+
     Console.Clear();
     Console.WriteLine($"Infinity Breaker Engine - Version {version}");
     Console.WriteLine("Optimized for high-precision calculations with BigInteger scaling.");
     Console.WriteLine("This version includes support for 500 decimal places in division and root operations.");
     Console.WriteLine("Developed by Gemini 3 Flash.");
+    Console.WriteLine($"\nTarget Hardware: CPU is {cpuInfo}; RAM is {ramInfo} GB. RAM Details: {allRamInfo}");
     Console.WriteLine("\nPress Enter to return...");
     Console.ReadLine();
 }
@@ -1225,8 +1643,8 @@ static void InitiateSelfDestruct()
     Console.WriteLine("UNAUTHORIZED OVERRIDE DETECTED IN ENGINE CORE.");
     Console.WriteLine("----------------------------------------------");
     Console.WriteLine("Initiating emergency containment failure...");
-    Console.WriteLine($"Target Hardware: Intel i7-13620H Detected.");
-    Console.WriteLine($"Target Software: Infinity Breaker v{version}");
+    Console.WriteLine($"Target Hardware: CPU is {cpuInfo}; RAM is {ramInfo} GB. ");
+    Console.WriteLine($"Target Software: Infinity Breaker Version{version}");
     Console.WriteLine("----------------------------------------------");
     for (int i = 5; i > 0; i--)
     {
