@@ -10,7 +10,7 @@ using System.Linq;
 class Calculator
 {
 
-    static string version = "1.1.25 (Stable)";
+    static string version = "1.5.0 (Stable)";
     static void Main()
     {
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
