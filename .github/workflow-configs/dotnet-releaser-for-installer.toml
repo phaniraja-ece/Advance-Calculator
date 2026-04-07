@@ -1,0 +1,4 @@
+[build]
+artifacts-dir = "output"
+configuration = "Release"
+rid = ["win-x64", "linux-x64", "osx-x64"]
