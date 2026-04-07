@@ -42,7 +42,7 @@ jobs:
       # 2. Build and Package (This creates the EXE Installer, MSI, DEB, RPM, etc.)
       # It uses your .csproj metadata to configure the installation paths automatically.
       - name: Run Dotnet Releaser
-        run: dotnet-releaser build --output output --rid ${{ matrix.rid }}
+        run: dotnet-releaser build --artifacts-dir output --rid ${{ matrix.rid }}
 
       # 3. Upload all generated installers
       - name: Upload Results
