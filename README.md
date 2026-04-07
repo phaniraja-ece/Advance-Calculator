@@ -26,9 +26,7 @@
   ``` powershell
   git clone https://github.com/phaniraja-ece/Advance-Calculator.git 
   ```
-  then:
-  ``` powershell
-  git clone https://github.com/phaniraja-ece/Advance-Calculator.git 
+  then: 
   ``` powershell
   cd Advance-Calculator
   ```
