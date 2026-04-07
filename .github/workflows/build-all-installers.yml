@@ -36,15 +36,12 @@ jobs:
         run: |
           dotnet tool install --global dotnet-releaser
           if ("${{ matrix.os }}" -eq "windows-latest") {
-            dotnet tool install --global dotnet-wix
+            choco install wix --version=4.0.2 -y
           }
 
-      # 2. Build and Package (This creates the EXE Installer, MSI, DEB, RPM, etc.)
-      # It uses your .csproj metadata to configure the installation paths automatically.
+      # 2. Build and Package (uses your TOML config)
       - name: Run Dotnet Releaser
         run: dotnet-releaser build .github/workflow-configs/dotnet-releaser-for-installer.toml
-
-
 
       # 3. Upload all generated installers
       - name: Upload Results
