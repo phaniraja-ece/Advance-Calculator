@@ -36,7 +36,7 @@ jobs:
         run: |
           dotnet tool install --global dotnet-releaser
           if ("${{ matrix.os }}" -eq "windows-latest") {
-            choco install wix --version=4.0.2 -y
+            choco install wixtoolset -y
           }
 
       # 2. Build and Package (uses your TOML config)
