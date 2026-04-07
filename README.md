@@ -1,8 +1,4 @@
 # Advance-Calculator
-[![Windows Build](https://github.com/phaniraja-ece/Advance-Calculator/actions/workflows/dotnet.yml/badge.svg)](https://github.com/phaniraja-ece/Advance-Calculator/actions/workflows/dotnet-windows.yml)
-
-
-
 
 # Allows ypu to run any kind of calculation whether it is as simple as addition or as complex as pertration.
 
