@@ -1,6 +1,8 @@
 # Advance-Calculator
 
-# Allows ypu to run any kind of calculation whether it is as simple as addition or as complex as pertration.
+[![Manual Native Installers](https://github.com/phaniraja-ece/Advance-Calculator/actions/workflows/build-all-installers.yml/badge.svg)](https://github.com/phaniraja-ece/Advance-Calculator/actions/workflows/build-all-installers.yml)
+
+# Allows you to run any kind of calculation whether it is as simple as addition or as complex as pertration.
 
 ## Features
 
