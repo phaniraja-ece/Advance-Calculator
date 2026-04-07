@@ -41,8 +41,11 @@ jobs:
 
       # 2. Build and Package (This creates the EXE Installer, MSI, DEB, RPM, etc.)
       # It uses your .csproj metadata to configure the installation paths automatically.
+      - name: Prepare Releaser Config
+        run: cp .github/workflow-configs/dotnet-releaser-for-installer.toml dotnet-releaser.toml
+
       - name: Run Dotnet Releaser
-        run: dotnet-releaser build --config .github/workflow-configs/dotnet-releaser-for-installer.toml
+        run: dotnet-releaser build
 
 
       # 3. Upload all generated installers
