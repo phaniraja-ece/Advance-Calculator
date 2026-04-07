@@ -1,4 +1,25 @@
 [build]
-artifacts-dir = "output"
 configuration = "Release"
 rid = ["win-x64", "linux-x64", "osx-x64"]
+
+[package]
+# Output directory for artifacts
+artifacts-dir = "output"
+
+# Windows installers
+[[package.windows]]
+kind = "msi"
+[[package.windows]]
+kind = "exe"
+
+# macOS installers
+[[package.macos]]
+kind = "dmg"
+[[package.macos]]
+kind = "pkg"
+
+# Linux installers
+[[package.linux]]
+kind = "deb"
+[[package.linux]]
+kind = "rpm"
