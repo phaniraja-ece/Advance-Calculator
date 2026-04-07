@@ -29,10 +29,10 @@
 - Paste the following commands in the terminal; Make sure you have .NET SDK 10, either Visual Studio 2026, Visual Studio 2022 or Visual Studio Code and Git
   ``` powershell
       git clone https://github.com/phaniraja-ece/Advance-Calculator.git ```
-  
+  then:
   ``` powershell
       cd Advance-Calculator ```
-  
+  then:
   ``` powershell
       dotnet build && dotnet run ```
 
